@@ -1,17 +1,71 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
-    <link href="./styles.css" rel="stylesheet">
+<head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <!-- necessary for Electron, but destroys Live Server -->
+    <!--<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">-->
     <title>FaceMask</title>
-  </head>
-  <body>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel='stylesheet' type='text/css' media='screen' href='https://unpkg.com/webcam-easy/demo/style/webcam-demo.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='style/face-mask.css'>
+    <script src="//code.jquery.com/jquery-3.3.1.min.js"></script>  
+    <script src="https://unpkg.com/@tensorflow/tfjs-core@2.4.0/dist/tf-core.js"></script>
+    <script src="https://unpkg.com/@tensorflow/tfjs-converter@2.4.0/dist/tf-converter.js"></script>
+    <script src="https://unpkg.com/@tensorflow/tfjs-backend-webgl@2.4.0/dist/tf-backend-webgl.js"></script>
+    <script src="https://unpkg.com/@tensorflow-models/face-landmarks-detection@0.0.1/dist/face-landmarks-detection.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/webcam-easy/dist/webcam-easy.min.js"></script>
+    <script type="text/javascript" src="js/webcam-ui-lib.js"></script>
+</head>
+<body>
+    <main id="face-mask-app">
+        <div id="image-container">
+            <div id="canvas" width="640" height="480"></div>
+            <div class="loading d-none">
+                Loading Model
+                <div class="spinner-border" role="status">
+                    <span class="sr-only"></span>
+                </div>
+            </div>
+            
+            <div class="form-control" id="button-control">
+                <button id="mask-btn" class="btn btn-primary">Put Mask On!</button>
+            </div>
 
-    <video id="video" width="900" height="700" autoplay muted></video>
-
-    <!-- You can also require other files to run in this process -->
-    <script src="renderer.js"></script>
-  </body>
+            <div id="mask-slider">
+                <img id="arrowLeft" src="images/arrow-left.png">
+                <div id="mask-list">
+                    <ul>
+                        <li class="selected-mask"><img src="images/half-mask-0.png" data-mask-type="half" data-scale-width="1.2" data-scale-height="1.2" data-scale-height="1.2" data-top-adj="0.05" data-left-adj="0"></li>
+                        <li><img src="images/half-mask-1.png" data-mask-type="half" data-scale-width="1.2" data-scale-height="1.2" data-scale="1.2" data-top-adj="0.1" data-left-adj="0"></li>
+                        <li><img src="images/half-mask-2.png" data-mask-type="half" data-scale-width="1.1" data-scale-height="1.1" data-top-adj="0.15" data-left-adj="0"></li>
+                        <li><img src="images/half-mask-3.png" data-mask-type="half" data-scale-width="1.2" data-scale-height="1.2" data-top-adj="0.1" data-left-adj="0"></li>
+                        <li><img src="images/half-mask-5.png" data-mask-type="half" data-scale-width="1.2" data-scale-height="1.2" data-top-adj="0.2" data-left-adj="0"></li>
+                        <li><img src="images/half-mask-6.png" data-mask-type="half" data-scale-width="1.2" data-scale-height="1.2" data-top-adj="0.1" data-left-adj="0"></li>
+                        <li><img src="images/full-mask-1.png" class="full-mask" data-mask-type="full" data-scale-width="1.4" data-scale-height="1.4" data-top-adj="0" data-left-adj="0"></li>
+                        <li><img src="images/full-mask-2.png" class="full-mask" data-mask-type="full" data-scale-width="1.1" data-scale-height="1.1" data-top-adj="0" data-left-adj="0"></li>
+                        <li><img src="images/full-mask-3.png" class="full-mask" data-mask-type="full" data-scale-width="2.0" data-scale-height="1.6" data-top-adj="0" data-left-adj="0"></li>
+                        <li><img src="images/full-mask-4.png" class="full-mask" data-mask-type="full" data-scale-width="1.1" data-scale-height="1.3" data-top-adj="0.1" data-left-adj="0"></li>
+                    </ul>
+                </div>
+                <img id="arrowRight" src="images/arrow-right.png">
+            </div>
+        </div>
+        <div id="errorMsg" class="col-12 col-md-6 alert-danger d-none">
+            Fail to start camera, please allow permision to access camera. <br/>
+            If you are browsing through social media built in browsers, you would need to open the page in Sarafi (iPhone)/ Chrome (Android)
+            <button id="closeError" class="btn btn-primary ml-3">OK</button>
+        </div>
+        <div class="md-modal md-effect-12">
+            <div id="app-panel" class="app-panel md-content row p-0 m-0">     
+                <div id="webcam-container" class="webcam-container col-12 d-none p-0 m-0">
+                    <video id="webcam" autoplay playsinline width="640" height="480"></video>
+                </div>
+            </div>        
+        </div>
+        <div class="md-overlay"></div>
+    </main>
+    <script src='js/face-mask.js'></script>
+</body>
 </html>
