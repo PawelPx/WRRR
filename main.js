@@ -31,8 +31,8 @@ if (process.platform === 'win32') {
 function createWindow() {
   // Create the browser window.
   mainWindow = new BrowserWindow({
-    width: 1024,
-    height: 768,
+    width: 1600,
+    height: 900,
     show: false,
     webPreferences: {
       nodeIntegration: true,
@@ -87,6 +87,8 @@ function createWindow() {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', createWindow)
+
+const foo = require('./src/main/main')
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
