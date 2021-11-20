@@ -94,7 +94,7 @@ async function detectFaces() {
 function drawMask(predictions){
     if(masks.length != predictions.length){
         clearCanvas();
-    }   
+    }
     overheadIndex = 0;
     chinIndex = 2;
     leftCheekIndex = 3;
@@ -135,30 +135,40 @@ function drawMask(predictions){
             switch(maskType) {
                 case 'full':
                     maskCoordinate= {top: dots[overheadIndex].top, left: dots[leftCheekIndex].left};
-                    maskHeight = (dots[chinIndex].top - dots[overheadIndex].top) ;
+                    maskHeight = Math.sqrt((dots[chinIndex].left - dots[overheadIndex].left)**2 + (dots[chinIndex].top - dots[overheadIndex].top)**2) ;
                     break;
                 case 'half':
                 default:
                     maskCoordinate = dots[leftCheekIndex];
-                    maskHeight = (dots[chinIndex].top - dots[leftCheekIndex].top) ;
+                    maskHeight = Math.sqrt((dots[chinIndex].left - dots[leftCheekIndex].left)**2 + (dots[chinIndex].top - dots[leftCheekIndex].top)**2) ;
                     break;
             }
-            maskWidth = (dots[rightCheekIndex].left - dots[leftCheekIndex].left) ;
+            maskWidth = Math.sqrt((dots[rightCheekIndex].left - dots[leftCheekIndex].left)**2 + (dots[rightCheekIndex].top - dots[leftCheekIndex].top)**2);
             maskSizeAdjustmentWidth = parseFloat(selectedMask.attr("data-scale-width"));
             maskSizeAdjustmentHeight = parseFloat(selectedMask.attr("data-scale-height"));
             maskSizeAdjustmentTop = parseFloat(selectedMask.attr("data-top-adj"));
             maskSizeAdjustmentLeft = parseFloat(selectedMask.attr("data-left-adj"));
             
+            //angleA = (dots[overheadIndex].left - dots[chinIndex].left) / (dots[rightCheekIndex].left - dots[leftCheekIndex].left)
+            //angleB = (dots[leftCheekIndex].left - dots[rightCheekIndex].left) / (dots[overheadIndex].left - dots[chinIndex].left)
+            //maskAngle = (angleA <= 1 ? angleA : (2 + angleB)) * 45;
+            x0 = (dots[rightCheekIndex].left + dots[leftCheekIndex].left) / 2;
+            y0 = (dots[overheadIndex].top + dots[chinIndex].top) / 2;
+            dx = x0-dots[overheadIndex].left;
+            dy = dots[overheadIndex].top-y0;
+            maskAngle = -(Math.atan2(dy, dx) * (180/Math.PI) + 90);
+
             maskTop = maskCoordinate.top - ((maskHeight * (maskSizeAdjustmentHeight-1))/2) - (maskHeight * maskSizeAdjustmentTop);
             maskLeft = maskCoordinate.left - ((maskWidth * (maskSizeAdjustmentWidth-1))/2) + (maskWidth * maskSizeAdjustmentLeft);
             
+            maskElement.css('transform','rotate(' + maskAngle + 'deg)');
             maskElement.css({
                 top: maskTop, 
                 left: maskLeft, 
                 width: maskWidth * maskSizeAdjustmentWidth,
                 height: maskHeight * maskSizeAdjustmentHeight,
                 position:'absolute'
-            });    
+            });
         }
     }
 }
