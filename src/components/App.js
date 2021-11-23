@@ -29,10 +29,12 @@ const App = () => {
 
   // const [bottom, setBottom] = useState(0);
   // const [left, setLeft] = useState(0);
-
   const [cord, setCord] = useState([]);
-
   const [counter, setCounter] = useState(0);
+  const [maskAngle, setMaskAngle] = useState(0);
+  const [maskHeight, setMaskHeight] = useState(0);
+  const [maskWidth, setMaskWidth] = useState(0);
+  console.log(maskAngle);
 
   const runFacemesh = async () => {
     const net = await facemesh.load(facemesh.SupportedPackages.mediapipeFacemesh);
@@ -51,6 +53,9 @@ const App = () => {
       const video = webcamRef.current.video;
       const videoWidth = webcamRef.current.video.videoWidth;
       const videoHeight = webcamRef.current.video.videoHeight;
+      video.style.cssText = "-moz-transform: scale(-1, 1); \
+      -webkit-transform: scale(-1, 1); -o-transform: scale(-1, 1); \
+      transform: scale(-1, 1); filter: FlipH;";
 
       // Set video width
       webcamRef.current.video.width = videoWidth;
@@ -92,7 +97,21 @@ const App = () => {
       setCord([minx, maxx, miny, maxy])
 
       // console.log(minx, maxx, miny, maxy)
-
+      let overhead = keypoints[10];
+      let leftCheek = keypoints[234];
+      let chin = keypoints[152];
+      let rightCheek = keypoints[454];
+      
+      const height = Math.sqrt((chin[0] - overhead[0])**2 + (chin[1] - overhead[1])**2) ;
+      const width = Math.sqrt((leftCheek[0] - rightCheek[0])**2 + (leftCheek[0] - rightCheek[0])**2);
+      const x0 = (rightCheek[0] + leftCheek[0]) / 2;
+      const y0 = (overhead[1] + chin[1]) / 2;
+      const dx = x0-overhead[0];
+      const dy = overhead[1]-y0;
+      const angle = Math.atan2(dy, dx) * (180/Math.PI) + 90;
+      setMaskAngle(angle);
+      setMaskHeight(height);
+      setMaskWidth(width);
 
       // requestAnimationFrame(()=>{drawMesh(face, ctx)});
     }
@@ -122,9 +141,6 @@ const App = () => {
 
   return (
     <div>
-      <h1>Hello, Electron!</h1>
-
-      <p>I hope you enjoy using basic-electron-react-boilerplate to start your dev off right! {counter}</p>
       <button onClick={handleClickPlus}>plus</button>
       <button onClick={handleClickMinus}>minus</button>
 
@@ -155,15 +171,18 @@ const App = () => {
             width: 640,
             height: 480,
           }}></canvas>
+          
           <img src={getMask()} style={{
             position: "absolute",
-            left: 130+cord[0] - (cord[1]-cord[0])*0.28 ,
-            top: 90+cord[2] - (cord[3]-cord[2])*0.22 ,
+            left: 670-(130+cord[0] - (cord[1]-cord[0])*0.28) ,
+            top: cord[2] - (cord[3]-cord[2])*0.22 ,
+            //top: 90+cord[2] - (cord[3]-cord[2])*0.22 ,    old one
             right: 0,
             textAlign: "center",
             zindex: 9,
-            width: (cord[1]-cord[0])*1.5,
-            height: (cord[3]-cord[2])*1.5,
+            width: maskWidth,
+            height: maskHeight*1.5,
+            transform: `rotate(${maskAngle}deg)`,
           }}></img>
 
       </>
