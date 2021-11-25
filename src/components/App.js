@@ -34,7 +34,8 @@ const App = () => {
   const [maskAngle, setMaskAngle] = useState(0);
   const [maskHeight, setMaskHeight] = useState(0);
   const [maskWidth, setMaskWidth] = useState(0);
-  console.log(maskAngle);
+  const [location, setLocation] = useState([]);
+  
 
   const runFacemesh = async () => {
     const net = await facemesh.load(facemesh.SupportedPackages.mediapipeFacemesh);
@@ -112,6 +113,7 @@ const App = () => {
       setMaskAngle(angle);
       setMaskHeight(height);
       setMaskWidth(width);
+      setLocation([rightCheek[0], overhead[1]]);
 
       // requestAnimationFrame(()=>{drawMesh(face, ctx)});
     }
@@ -174,9 +176,10 @@ const App = () => {
           
           <img src={getMask()} style={{
             position: "absolute",
-            left: 670-(130+cord[0] - (cord[1]-cord[0])*0.28) ,
-            top: cord[2] - (cord[3]-cord[2])*0.22 ,
-            //top: 90+cord[2] - (cord[3]-cord[2])*0.22 ,    old one
+            //left: 670-(130+cord[0] - (cord[1]-cord[0])*0.28),
+            //top: 90+cord[2] - (cord[3]-cord[2])*0.22,    old ones
+            left: 710-location[0],
+            top: location[1]-30,
             right: 0,
             textAlign: "center",
             zindex: 9,
