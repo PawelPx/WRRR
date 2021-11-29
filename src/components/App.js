@@ -17,11 +17,14 @@ import mask1 from '../assets/faces/full-mask-2.png'
 import mask2 from '../assets/faces/full-mask-3.png'
 import mask3 from '../assets/faces/full-mask-4.png'
 
+import Slider from "react-slick"
+
 const videoConstraints = {
   width: 1280,
   height: 720,
   facingMode: "user"
 };
+
 const App = () => {
 
   const webcamRef = useRef(null);
@@ -36,6 +39,28 @@ const App = () => {
   const [maskWidth, setMaskWidth] = useState(0);
   const [location, setLocation] = useState([]);
   
+  const images = [
+    {
+      id: "fullMask1",
+      index: 0,
+      url: mask0
+    },
+    {
+      id: "fullMask2",
+      index: 1,
+      url: mask1
+    },
+    {
+      id: "fullMask3",
+      index: 2,
+      url: mask2
+    },
+    {
+      id: "fullMask4",
+      index: 3,
+      url: mask3
+    }
+  ];
 
   const runFacemesh = async () => {
     const net = await facemesh.load(facemesh.SupportedPackages.mediapipeFacemesh);
@@ -121,31 +146,26 @@ const App = () => {
 
   useEffect(()=>{runFacemesh()}, []);
 
-  const handleClickPlus = (e) => {
-    e.preventDefault();
-
-    setCounter(c => (c+1)%4)
-  }
-  const handleClickMinus = (e) => {
-    e.preventDefault();
-
-    if(counter - 1 < 0) {
-      setCounter(3)
-    } else{
-      setCounter(c => (c-1)%4)
-    }
-  }
-
   const getMask = () => {
-    const tab = [mask0,mask1,mask2,mask3]
-    return tab[counter]
+    return images[counter].url
+  }
+
+  const sliderSettings = {
+    infinite: true, 
+    speed: 500, 
+    slidesToShow: 3, 
+    slidesToScroll: 1,
+    swipeToSlide: true, 
+    focusOnSelect: true,
+    className: "slider",
+  };
+
+  const onMaskClick = (index) => {
+    setCounter(index)
   }
 
   return (
     <div>
-      <button onClick={handleClickPlus}>plus</button>
-      <button onClick={handleClickMinus}>minus</button>
-
       <>
         <Webcam
           ref={webcamRef}
@@ -178,7 +198,7 @@ const App = () => {
             position: "absolute",
             //left: 670-(130+cord[0] - (cord[1]-cord[0])*0.28),
             //top: 90+cord[2] - (cord[3]-cord[2])*0.22,    old ones
-            left: 710-location[0],
+            left: 610-location[0],
             top: location[1]-30,
             right: 0,
             textAlign: "center",
@@ -189,7 +209,20 @@ const App = () => {
           }}></img>
 
       </>
+
+      <Slider {...sliderSettings}>
+        {images.map((image) => {
+          return (
+            <div className="wrapper" key={image.id}>
+              <button className="maskButton" onClick={() => onMaskClick(image.index)}>
+                <img className="sliderImg" src={image.url}/>
+              </button>
+            </div>
+          );
+        })}
+      </Slider>
     </div>
+    
   )
 }
 

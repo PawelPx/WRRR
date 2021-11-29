@@ -1,3 +1,37 @@
 /* Main CSS file */
 
 @import '_example/_example.css';
+@import url("https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick.min.css");
+@import url("https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.6.0/slick-theme.min.css");
+
+.wrapper {
+  text-align: center;
+  padding: 10px;
+}
+
+.maskButton{
+  border: 1px solid #f7f7f7;
+  border-radius: 50px;
+  background: transparent;
+}
+
+.sliderImg {
+  box-sizing: border-box;
+  height: 200px;
+  width: 200px;
+  padding: 10px;
+  object-fit: scale-down;
+}
+
+.slider .slick-prev,
+.slider .slick-next {
+  z-index: 9;
+}
+
+.slider .slick-prev {
+  left: 0;
+}
+
+.slider .slick-next {
+  right: 0;
+}
