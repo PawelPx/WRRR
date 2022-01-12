@@ -273,7 +273,7 @@ const App = () => {
             position: "absolute",
             //left: 670-(130+cord[0] - (cord[1]-cord[0])*0.28),
             //top: 90+cord[2] - (cord[3]-cord[2])*0.22,    old ones
-            left: counter > 3 ? 625 - location[0] : 610 - location[0],
+            left: counter > 3 ? 635 - location[0] : 620 - location[0],
             top: counter > 3 ? location[1] + 60 : location[1] - 30,
             right: 0,
             textAlign: "center",
