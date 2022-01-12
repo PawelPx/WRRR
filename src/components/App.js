@@ -42,6 +42,8 @@ const App = () => {
   const [maskWidth, setMaskWidth] = useState(0);
   const [location, setLocation] = useState([]);
 
+  const [age, setAge] = useState("")
+
   const images = [
     {
       id: "fullMask1",
@@ -85,16 +87,16 @@ const App = () => {
     },
   ];
 
-  const runFacemesh = async () => {
+  const runFacemesh = async (model) => {
     const net = await facemesh.load(
       facemesh.SupportedPackages.mediapipeFacemesh
     );
     setInterval(() => {
-      detect(net);
+      detect(net, model);
     }, 50);
   };
 
-  const detect = async (net) => {
+  const detect = async (net, model) => {
     if (
       typeof webcamRef.current !== "undefined" &&
       webcamRef.current !== null &&
@@ -117,8 +119,19 @@ const App = () => {
       canvasRef.current.width = videoWidth;
       canvasRef.current.height = videoHeight;
 
+      tf.engine().startScope()
+      const prd = await model.predict(
+        tf.browser.fromPixels(video)
+        .resizeNearestNeighbor([112, 112])
+        .toFloat()
+        .expandDims()
+      ).data()
+
+      processPreds(prd)
+
       // Make Detections
       const face = await net.estimateFaces({ input: video });
+      tf.engine().endScope()
 
       // Get canvas context
       const ctx = canvasRef.current.getContext("2d");
@@ -175,8 +188,32 @@ const App = () => {
     }
   };
 
-  useEffect(() => {
-    runFacemesh();
+  const processPreds = preds => {
+    const idx = preds.indexOf(1);
+    let dic = {}
+    dic["7"] = "60-70_old"
+    dic["0"] = "0-10_old"
+    dic["1"] = "10-20_old"
+    dic["2"] = "100+_old"
+    dic["3"] = "20-30_old"
+    dic["4"] = "30-40_old"
+    dic["5"] = "40-50_old"
+    dic["6"] = "50-60_old"
+    dic["8"] = "70-80_old"
+    dic["9"] = "80-90_old"
+    dic["10"] = "90-100_old"
+
+    const res = dic[idx.toString()]
+
+    setAge(old => res ? res : old)
+  }
+
+  useEffect(async () => {
+    // thats why we need small flask server o host model
+    // could find any workaround for this
+    // tfjs node from google breaks app
+    const model = await tf.loadLayersModel("http://127.0.0.1:5000/js/model.json");
+    runFacemesh(model);
   }, []);
 
   const getMask = () => {
@@ -214,6 +251,7 @@ const App = () => {
             height: 480,
           }}
         />
+        <h2>{age}</h2>
         <canvas
           ref={canvasRef}
           style={{
