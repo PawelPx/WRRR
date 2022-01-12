@@ -13,6 +13,8 @@ import { drawMesh } from "./utilities";
 import "../assets/css/App.css";
 
 import mask0 from "../assets/faces/full-mask-1.png";
+import mask01 from "../assets/faces/full-mask-1-left.png";
+import mask02 from "../assets/faces/full-mask-1-right.png";
 import mask1 from "../assets/faces/full-mask-2.png";
 import mask2 from "../assets/faces/full-mask-3.png";
 import mask3 from "../assets/faces/full-mask-4.png";
@@ -40,9 +42,9 @@ const App = () => {
   const [maskAngle, setMaskAngle] = useState(0);
   const [maskHeight, setMaskHeight] = useState(0);
   const [maskWidth, setMaskWidth] = useState(0);
+  const [maskWidth1, setMaskWidth1] = useState(0);
+  const [maskWidth2, setMaskWidth2] = useState(0);
   const [location, setLocation] = useState([]);
-
-  const [age, setAge] = useState("")
 
   const images = [
     {
@@ -87,16 +89,16 @@ const App = () => {
     },
   ];
 
-  const runFacemesh = async (model) => {
+  const runFacemesh = async () => {
     const net = await facemesh.load(
       facemesh.SupportedPackages.mediapipeFacemesh
     );
     setInterval(() => {
-      detect(net, model);
+      detect(net);
     }, 50);
   };
 
-  const detect = async (net, model) => {
+  const detect = async (net) => {
     if (
       typeof webcamRef.current !== "undefined" &&
       webcamRef.current !== null &&
@@ -119,19 +121,8 @@ const App = () => {
       canvasRef.current.width = videoWidth;
       canvasRef.current.height = videoHeight;
 
-      tf.engine().startScope()
-      const prd = await model.predict(
-        tf.browser.fromPixels(video)
-        .resizeNearestNeighbor([112, 112])
-        .toFloat()
-        .expandDims()
-      ).data()
-
-      processPreds(prd)
-
       // Make Detections
       const face = await net.estimateFaces({ input: video });
-      tf.engine().endScope()
 
       // Get canvas context
       const ctx = canvasRef.current.getContext("2d");
@@ -166,6 +157,7 @@ const App = () => {
       let leftCheek = keypoints[234];
       let chin = keypoints[152];
       let rightCheek = keypoints[454];
+      let nose = keypoints[1];
 
       const height = Math.sqrt(
         (chin[0] - overhead[0]) ** 2 + (chin[1] - overhead[1]) ** 2
@@ -173,6 +165,14 @@ const App = () => {
       const width = Math.sqrt(
         (leftCheek[0] - rightCheek[0]) ** 2 +
           (leftCheek[0] - rightCheek[0]) ** 2
+      );
+      const width1 = Math.sqrt(
+        (rightCheek[0] - nose[0]) ** 2 +
+          (rightCheek[0] - nose[0]) ** 2
+      );
+      const width2 = Math.sqrt(
+        (nose[0] - leftCheek[0]) ** 2 +
+          (nose[0] - leftCheek[0]) ** 2
       );
       const x0 = (rightCheek[0] + leftCheek[0]) / 2;
       const y0 = (overhead[1] + chin[1]) / 2;
@@ -182,38 +182,16 @@ const App = () => {
       setMaskAngle(angle);
       setMaskHeight(height);
       setMaskWidth(width);
+      setMaskWidth1(width1);
+      setMaskWidth2(width2);
       setLocation([rightCheek[0], overhead[1]]);
 
       // requestAnimationFrame(()=>{drawMesh(face, ctx)});
     }
   };
 
-  const processPreds = preds => {
-    const idx = preds.indexOf(1);
-    let dic = {}
-    dic["7"] = "60-70_old"
-    dic["0"] = "0-10_old"
-    dic["1"] = "10-20_old"
-    dic["2"] = "100+_old"
-    dic["3"] = "20-30_old"
-    dic["4"] = "30-40_old"
-    dic["5"] = "40-50_old"
-    dic["6"] = "50-60_old"
-    dic["8"] = "70-80_old"
-    dic["9"] = "80-90_old"
-    dic["10"] = "90-100_old"
-
-    const res = dic[idx.toString()]
-
-    setAge(old => res ? res : old)
-  }
-
-  useEffect(async () => {
-    // thats why we need small flask server o host model
-    // could find any workaround for this
-    // tfjs node from google breaks app
-    const model = await tf.loadLayersModel("http://127.0.0.1:5000/js/model.json");
-    runFacemesh(model);
+  useEffect(() => {
+    runFacemesh();
   }, []);
 
   const getMask = () => {
@@ -251,7 +229,6 @@ const App = () => {
             height: 480,
           }}
         />
-        <h2>{age}</h2>
         <canvas
           ref={canvasRef}
           style={{
@@ -268,17 +245,29 @@ const App = () => {
         ></canvas>
 
         <img
-          src={getMask()}
+          src={mask01}
           style={{
             position: "absolute",
-            //left: 670-(130+cord[0] - (cord[1]-cord[0])*0.28),
-            //top: 90+cord[2] - (cord[3]-cord[2])*0.22,    old ones
             left: counter > 3 ? 635 - location[0] : 620 - location[0],
             top: counter > 3 ? location[1] + 60 : location[1] - 30,
             right: 0,
             textAlign: "center",
             zindex: 9,
-            width: counter > 3 ? maskWidth * 0.9 : maskWidth,
+            width: counter > 3 ? maskWidth1 * 0.9 : maskWidth1,
+            height: counter > 3 ? maskHeight * 0.7 : maskHeight * 1.5,
+            transform: `rotate(${maskAngle}deg)`,
+          }}
+        ></img>
+        <img
+          src={mask02}
+          style={{
+            position: "absolute",
+            left: counter > 3 ? 635 - location[0] : 620 - location[0] + Math.cos(Math.PI / 180 * Math.abs(maskAngle)) * (counter > 3 ? maskWidth1 * 0.9 : maskWidth1),
+            top: counter > 3 ? location[1] + 60 : location[1] - 30 + (maskAngle > 0 ? 1 : -1) * (Math.sin(Math.PI / 180 * Math.abs(maskAngle)) * (counter > 3 ? maskWidth1 * 0.9 : maskWidth1)),
+            right: 0,
+            textAlign: "center",
+            zindex: 9,
+            width: counter > 3 ? maskWidth2 * 0.9 : maskWidth2,
             height: counter > 3 ? maskHeight * 0.7 : maskHeight * 1.5,
             transform: `rotate(${maskAngle}deg)`,
           }}
