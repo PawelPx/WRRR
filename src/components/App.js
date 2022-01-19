@@ -20,6 +20,11 @@ import halfmask0 from "../assets/faces/half-mask-1.png";
 import halfmask1 from "../assets/faces/half-mask-2.png";
 import halfmask2 from "../assets/faces/half-mask-3.png";
 import halfmask3 from "../assets/faces/half-mask-4.png";
+import glasses0 from "../assets/faces/glasses-1.png";
+import glasses1 from "../assets/faces/glasses-2.png";
+import glasses2 from "../assets/faces/glasses-3.png";
+import glasses3 from "../assets/faces/glasses-4.png";
+import ageframe from "../assets/faces/frame.png";
 
 import Slider from "react-slick";
 
@@ -84,6 +89,31 @@ const App = () => {
       id: "halfMask4",
       index: 7,
       url: halfmask3,
+    },
+    {
+      id: "glases1",
+      index: 8,
+      url: glasses0,
+    },
+    {
+      id: "glasses2",
+      index: 9,
+      url: glasses1,
+    },
+    {
+      id: "glasses3",
+      index: 10,
+      url: glasses2,
+    },
+    {
+      id: "glasses4",
+      index: 11,
+      url: glasses3,
+    },
+    {
+      id: "ageFrame",
+      index: 12,
+      url: ageframe,
     },
   ];
 
@@ -234,6 +264,37 @@ const App = () => {
     setCounter(index);
   };
 
+  const getLeft = () => {
+    if (counter == 12) return 640 - location[0];
+    if (counter == 11) return 630 - location[0];
+    if (counter > 3) return 625 - location[0];
+    return 610 - location[0];
+  };
+
+  const getTop = () => {
+    if (counter == 12) return location[1] - 50;
+    if (counter == 11) return location[1] + 35;
+    if (counter == 10) return location[1] + 15;
+    if (counter > 3) return location[1] + 60;
+    return location[1] - 30;
+  };
+
+  const getWidth = () => {
+    if (counter == 12) return maskWidth * 0.8;
+    if (counter == 11) return maskWidth * 0.8;
+    if (counter > 7) return maskWidth * 0.85;
+    if (counter > 3) return maskWidth * 0.9;
+    return maskWidth;
+  };
+
+  const getHeight = () => {
+    if (counter == 12) return maskHeight * 1.3;
+    if (counter > 9) return maskHeight * 0.5;
+    if (counter > 7) return maskHeight * 0.35;
+    if (counter > 3) return maskHeight * 0.7;
+    return maskHeight * 1.5;
+  };
+
   return (
     <div>
       <>
@@ -251,7 +312,22 @@ const App = () => {
             height: 480,
           }}
         />
-        <h2>{age}</h2>
+
+        <h2
+          style={{
+            position: "absolute",
+            left: counter == 12 ? 640 - location[0] : 0,
+            top: counter == 12 ? location[1] - 50 : 0,
+            right: 0,
+            textAlign: "center",
+            zindex: 9,
+            width: counter == 12 ? maskWidth * 0.8 : 0,
+            height: counter == 12 ? maskHeight * 1.3 : 0,
+            transform: `rotate(${maskAngle}deg)`,
+            visibility: counter == 12 ? "visible" : "hidden",
+          }}
+        >{age}</h2>
+
         <canvas
           ref={canvasRef}
           style={{
@@ -273,13 +349,13 @@ const App = () => {
             position: "absolute",
             //left: 670-(130+cord[0] - (cord[1]-cord[0])*0.28),
             //top: 90+cord[2] - (cord[3]-cord[2])*0.22,    old ones
-            left: counter > 3 ? 625 - location[0] : 610 - location[0],
-            top: counter > 3 ? location[1] + 60 : location[1] - 30,
+            left: getLeft(), 
+            top: getTop(), 
             right: 0,
             textAlign: "center",
             zindex: 9,
-            width: counter > 3 ? maskWidth * 0.9 : maskWidth,
-            height: counter > 3 ? maskHeight * 0.7 : maskHeight * 1.5,
+            width: getWidth(), 
+            height: getHeight(), 
             transform: `rotate(${maskAngle}deg)`,
           }}
         ></img>
